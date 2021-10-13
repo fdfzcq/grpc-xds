@@ -1,14 +1,14 @@
 defmodule GRPC.XDS.ADS do
   def get_service_resource(service) do
     {:ok, channel} = Application.get_env(:grpc_xds, :control_plane_address) |> GRPC.Stub.connect()
-    get_resources(channel, [service])
+    channel |> get_resources([service]) |> Map.get(:resources) |> hd |> Map.get(:value) |> Envoy.Config.Listener.V3.Listener.decode()
   end
 
   def get_resources(channel, resources) do
     stream = GRPC.XDS.ADS.Stub.stream_aggregated_resources(channel, timeout: 30_000)
     req = discovery_request(resources)
-    stream_pid = spawn(fn -> GRPC.Stub.send_request(stream, req, end_stream: false) end)
-    response = wait_response(stream)
+    spawn(fn -> GRPC.Stub.send_request(stream, req, end_stream: false) end)
+    {:ok, response} = wait_response(stream)
     GRPC.Stub.end_stream(stream)
     response
   end
