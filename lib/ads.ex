@@ -1,4 +1,9 @@
 defmodule GRPC.XDS.ADS do
+  def get_service_resource(service) do
+    {:ok, channel} = Application.get_env(:grpc_xds, :control_plane_address) |> GRPC.Stub.connect()
+    get_resources(channel, [service])
+  end
+
   def get_resources(channel, resources) do
     stream = GRPC.XDS.ADS.Stub.stream_aggregated_resources(channel, timeout: 30_000)
     req = discovery_request(resources)
@@ -28,7 +33,7 @@ defmodule GRPC.XDS.ADS do
 
   def xds_node() do
     %Envoy.Config.Core.V3.Node{
-      id: "projects/150432616675/networks/xpn-network/nodes/elixir-test",
+      id: Application.get_env(:grpc_xds, :project_id),
       cluster: "cluster",
       metadata: nil,
       user_agent_name: "elixir-grpc",
