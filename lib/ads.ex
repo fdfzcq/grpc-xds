@@ -4,10 +4,6 @@ defmodule GRPC.XDS.ADS do
 
     channel
     |> get_resources(:listener, [service])
-    |> Map.get(:resources)
-    |> hd
-    |> Map.get(:value)
-    |> Envoy.Config.Listener.V3.Listener.decode()
   end
 
   def get_resources(channel, type, resources) do
