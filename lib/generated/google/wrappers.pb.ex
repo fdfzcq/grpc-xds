@@ -7,7 +7,7 @@ defmodule Google.Protobuf.DoubleValue do
         }
   defstruct [:value]
 
-  field :value, 1, type: :double
+  field(:value, 1, type: :double)
 end
 
 defmodule Google.Protobuf.FloatValue do
@@ -19,7 +19,7 @@ defmodule Google.Protobuf.FloatValue do
         }
   defstruct [:value]
 
-  field :value, 1, type: :float
+  field(:value, 1, type: :float)
 end
 
 defmodule Google.Protobuf.Int64Value do
@@ -31,7 +31,7 @@ defmodule Google.Protobuf.Int64Value do
         }
   defstruct [:value]
 
-  field :value, 1, type: :int64
+  field(:value, 1, type: :int64)
 end
 
 defmodule Google.Protobuf.UInt64Value do
@@ -43,7 +43,7 @@ defmodule Google.Protobuf.UInt64Value do
         }
   defstruct [:value]
 
-  field :value, 1, type: :uint64
+  field(:value, 1, type: :uint64)
 end
 
 defmodule Google.Protobuf.Int32Value do
@@ -55,7 +55,7 @@ defmodule Google.Protobuf.Int32Value do
         }
   defstruct [:value]
 
-  field :value, 1, type: :int32
+  field(:value, 1, type: :int32)
 end
 
 defmodule Google.Protobuf.UInt32Value do
@@ -67,7 +67,7 @@ defmodule Google.Protobuf.UInt32Value do
         }
   defstruct [:value]
 
-  field :value, 1, type: :uint32
+  field(:value, 1, type: :uint32)
 end
 
 defmodule Google.Protobuf.BoolValue do
@@ -79,7 +79,7 @@ defmodule Google.Protobuf.BoolValue do
         }
   defstruct [:value]
 
-  field :value, 1, type: :bool
+  field(:value, 1, type: :bool)
 end
 
 defmodule Google.Protobuf.StringValue do
@@ -91,7 +91,7 @@ defmodule Google.Protobuf.StringValue do
         }
   defstruct [:value]
 
-  field :value, 1, type: :string
+  field(:value, 1, type: :string)
 end
 
 defmodule Google.Protobuf.BytesValue do
@@ -103,5 +103,5 @@ defmodule Google.Protobuf.BytesValue do
         }
   defstruct [:value]
 
-  field :value, 1, type: :bytes
+  field(:value, 1, type: :bytes)
 end

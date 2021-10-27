@@ -1,12 +1,18 @@
 defmodule GRPC.XDS.ADS do
   def get_service_resource(service) do
     {:ok, channel} = Application.get_env(:grpc_xds, :control_plane_address) |> GRPC.Stub.connect()
-    channel |> get_resources([service]) |> Map.get(:resources) |> hd |> Map.get(:value) |> Envoy.Config.Listener.V3.Listener.decode()
+
+    channel
+    |> get_resources(:listener, [service])
+    |> Map.get(:resources)
+    |> hd
+    |> Map.get(:value)
+    |> Envoy.Config.Listener.V3.Listener.decode()
   end
 
-  def get_resources(channel, resources) do
+  def get_resources(channel, type, resources) do
     stream = GRPC.XDS.ADS.Stub.stream_aggregated_resources(channel, timeout: 30_000)
-    req = discovery_request(resources)
+    req = discovery_request(type, resources)
     spawn(fn -> GRPC.Stub.send_request(stream, req, end_stream: false) end)
     {:ok, response} = wait_response(stream)
     GRPC.Stub.end_stream(stream)
@@ -22,23 +28,22 @@ defmodule GRPC.XDS.ADS do
     end)
   end
 
-  def discovery_request(resources) do
+  def discovery_request(type, resources) do
     %Envoy.Service.Discovery.V3.DiscoveryRequest{
-      type_url: "type.googleapis.com/envoy.config.listener.v3.Listener",
+      type_url: type_to_url(type),
       response_nonce: "1",
       resource_names: resources,
-      node: xds_node
+      node: xds_node()
     }
   end
 
   def xds_node() do
     %Envoy.Config.Core.V3.Node{
       id: Application.get_env(:grpc_xds, :project_id),
-      cluster: "cluster",
-      metadata: nil,
-      user_agent_name: "elixir-grpc",
-      # {:user_agent_version, "1.0"},
-      user_agent_version_type: nil,
+      cluster: Application.get_env(:grpc_xds, :node_cluster),
+      metadata: xds_node_metadata(),
+      user_agent_name: Application.get_env(:grpc_xds, :user_agent_name),
+      user_agent_version_type: Application.get_env(:grpc_xds, :user_agent_version_type),
       dynamic_parameters: %{},
       extensions: [],
       client_features: ["envoy.lb.does_not_support_overprovisioning"],
@@ -46,17 +51,53 @@ defmodule GRPC.XDS.ADS do
     }
   end
 
-  def xds_node_metadata() do
+  defp type_to_url(:listener),
+    do: google_prefix() <> "envoy.config.listener.v3.Listener"
+
+  defp type_to_url(:route_configuration),
+    do: google_prefix() <> "envoy.config.route.v3.RouteConfiguration"
+
+  defp type_to_url(:scoped_route_configuration),
+    do: google_prefix() <> "envoy.config.route.v3.ScopeRouteConfiguration"
+
+  defp type_to_url(:virtual_host),
+    do: "envoy.config.route.v3.VirtualHost"
+
+  defp type_to_url(:cluster),
+    do: google_prefix() <> "envoy.config.cluster.v3.Cluster"
+
+  defp type_to_url(:cluster_load_assignment),
+    do: google_prefix() <> "envoy.config.endpoint.v3.ClusterLoadAssignment"
+
+  defp type_to_url(_), do: {:error, :unsupported_type}
+
+  defp google_prefix(), do: "type.googleapis.com/"
+
+  defp xds_node_metadata() do
     %Google.Protobuf.Struct{
-      fields: %{
-        "TRAFFICDIRECTOR_GCP_PROJECT_NUMBER" => %Google.Protobuf.Value{
-          kind: {:string_value, "150432616675"}
-        },
-        "TRAFFICDIRECTOR_NETWORK_NAME" => %Google.Protobuf.Value{
-          kind: {:string_value, "xpn-network"}
-        }
-      }
+      fields: to_protobuf_struct(Application.get_env(:grpc_xds, :node_metadata))
     }
+  end
+
+  defp to_protobuf_struct(map) do
+    map
+    |> Enum.map(fn {k, value} -> {k, to_protobuf_type(value)} end)
+    |> Map.new()
+  end
+
+  defp to_protobuf_type(value) do
+    typed_value =
+      cond do
+        is_nil(value) -> {:null_value, value}
+        is_number(value) -> {:number_value, value}
+        is_binary(value) -> {:string_value, value}
+        is_boolean(value) -> {:bool_value, value}
+        is_map(value) -> {:struct_value, to_protobuf_struct(value)}
+        is_list(value) -> {:list_value, Enum.map(value, &to_protobuf_type/1)}
+        true -> {:error, :unsupported_value_type}
+      end
+
+    %Google.Protobuf.Value{kind: typed_value}
   end
 end
 
