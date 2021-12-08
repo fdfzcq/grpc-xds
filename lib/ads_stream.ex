@@ -6,7 +6,7 @@ defmodule GRPC.XDS.ADS.Stream do
     # start the stream
     # TODO: make timeout configurable
     stream = GRPC.XDS.ADS.Stub.stream_aggregated_resources(channel, timeout: 30_000)
-    {:ok, %__MODULE__{channel: channel, stream: stream}}
+    {:ok, %__MODULE__{channel: channel, stream: stream, resources: %{}}}
   end
 
   def handle_call({:get_resource, resource_name, type}, _from, state) do

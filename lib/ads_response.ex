@@ -1,6 +1,6 @@
 defmodule GRPC.XDS.ADS.Response do
   def parse_response(response) do
-    response |> Map.get(:resouces) |> Enum.map(&parse_resource/1) |> Map.new()
+    response |> Map.get(:resources) |> Enum.map(&parse_resource/1) |> Map.new()
   end
 
   defp parse_resource(resource) do
