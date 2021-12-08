@@ -48,7 +48,7 @@ defmodule GRPC.XDS.ADS.Stream do
   defp update_resources_from_response(state, response) do
     resources_from_response =
       response
-      |> GRPC.XDS.ADS.Response.parse_response(response)
+      |> GRPC.XDS.ADS.Response.parse_response()
 
     updated_resources =
       state

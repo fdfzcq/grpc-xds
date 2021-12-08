@@ -1,5 +1,5 @@
 defmodule GRPC.XDS.ADS.Request do
-  defp discovery_request(type, resources, version) do
+  def discovery_request(type, resources, version) do
     %Envoy.Service.Discovery.V3.DiscoveryRequest{
       type_url: type_to_url(type),
       response_nonce: "1",

@@ -1,5 +1,12 @@
 defmodule GRPC.XDS.ADS.TypeMap do
-  def type_atom_to_type_url(),
+  @spec type_atom_to_type_url(atom()) :: String.t()
+  def type_atom_to_type_url(atom), do: Map.get(type_atom_to_type_url(), atom)
+  @spec type_url_to_type_atom(String.t()) :: atom()
+  def type_url_to_type_atom(url), do: Map.get(type_url_to_type_atom(), url)
+  @spec type_url_to_proto_module(String.t()) :: module()
+  def type_url_to_proto_module(url), do: Map.get(type_url_to_proto_module(), url)
+
+  defp type_atom_to_type_url(),
     do: %{
       listener: google_prefix() <> "envoy.config.listener.v3.Listener",
       route_configuration: google_prefix() <> "envoy.config.route.v3.RouteConfiguration",
@@ -10,7 +17,7 @@ defmodule GRPC.XDS.ADS.TypeMap do
       cluster_load_assignment: google_prefix() <> "envoy.config.endpoint.v3.ClusterLoadAssignment"
     }
 
-  def type_url_to_type_atom(),
+  defp type_url_to_type_atom(),
     do: %{
       (google_prefix() <> "envoy.config.listener.v3.Listener") => :listener,
       (google_prefix() <> "envoy.config.route.v3.RouteConfiguration") => :route_configuration,
@@ -22,7 +29,7 @@ defmodule GRPC.XDS.ADS.TypeMap do
         :cluster_load_assignment
     }
 
-  def type_url_to_proto_module(),
+  defp type_url_to_proto_module(),
     do: %{
       (google_prefix() <> "envoy.config.listener.v3.Listener") =>
         Envoy.Config.Listener.V3.Listener,
