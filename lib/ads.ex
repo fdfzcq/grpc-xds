@@ -1,5 +1,5 @@
 defmodule GRPC.XDS.ADS do
-  def get_service_resource(service) do
+  def lookup_service_addresses(service) do
     case Application.get_env(:grpc_xds, :control_plane_address) do
       nil -> {:error, :no_control_plane_address_set}
       address -> get_service_resource(address, service)
@@ -8,12 +8,12 @@ defmodule GRPC.XDS.ADS do
 
   def get_service_resource(control_plane_address, service) do
     {:ok, channel} = GRPC.Stub.connect(control_plane_address)
-    get_resources(channel, :listener, [service])
+    get_resources(channel, [service])
   end
 
-  def get_resources(channel, type, resources) do
+  def get_resources(channel, resources) do
     {:ok, pid} = GenServer.start_link(GRPC.XDS.ADS.Stream, channel)
-    {:ok, response} = GenServer.call(pid, {:send_discovery_request, type, resources})
+    {:ok, response} = GenServer.call(pid, {:send_discovery_request, resources})
     response
   end
 end

@@ -41,7 +41,10 @@ defmodule GRPC.XDS.ADS.TypeMap do
         Envoy.Config.Route.V3.VirtualHost,
       (google_prefix() <> "envoy.config.cluster.v3.Cluster") => Envoy.Config.Cluster.V3.Cluster,
       (google_prefix() <> "envoy.config.endpoint.v3.ClusterLoadAssignment") =>
-        Envoy.Config.Endpoint.V3.ClusterLoadAssignment
+        Envoy.Config.Endpoint.V3.ClusterLoadAssignment,
+      (google_prefix() <>
+         "envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager") =>
+        Envoy.Extensions.Filters.Network.HttpConnectionManager.V3.HttpConnectionManager
     }
 
   defp google_prefix(), do: "type.googleapis.com/"

@@ -3,6 +3,17 @@ defmodule GRPC.XDS.ADS.Response do
     response |> Map.get(:resources) |> Enum.map(&parse_resource/1) |> Map.new()
   end
 
+  def route_conf_name_from_listener_resources(resource) do
+    {_, api_listener} =
+      resource
+      |> Map.get(:api_listener)
+      |> Map.get(:api_listener)
+      |> parse_resource()
+
+    {:rds, rds} = Map.get(api_listener, :route_specifier)
+    Map.get(rds, :route_config_name)
+  end
+
   defp parse_resource(resource) do
     type_url = resource |> Map.get(:type_url)
     type_module = GRPC.XDS.ADS.TypeMap.type_url_to_proto_module(type_url)
