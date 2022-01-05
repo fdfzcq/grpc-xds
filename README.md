@@ -1,21 +1,8 @@
 # GrpcXds
 
-**TODO: Add description**
+This is a hack project that uses envoy's xDS gRPC API for service discovery. The implementation has proved to work with GCP's traffic director. Currently there are still many drawbacks in the implementation and this should not be used in prod. To name a few drawbacks:
 
-## Installation
-
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `grpc_xds` to your list of dependencies in `mix.exs`:
-
-```elixir
-def deps do
-  [
-    {:grpc_xds, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/grpc_xds](https://hexdocs.pm/grpc_xds).
-
+1. Continuous stream doesn't work for reason, so for each gRPC call, a new stream is created and closed subsequently.
+2. The elixir gRPC library has to be pinned to a specific version because the latest master (at the time of writing) doesn't work and neither did earlier versions.
+3. This only serves the purpose of service discovery and gives a list of IPs with highest weight according to the control plane. Extra load balancing is needed to choose an address.
+4. Only ADS is implemented for the sake of service discovery, but gRPC doesn't really need other xDS protocols.
